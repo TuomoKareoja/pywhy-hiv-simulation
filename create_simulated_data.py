@@ -208,7 +208,7 @@ for dataset_name, dset in datasets.items():
     df["outcome"] = dset.outcomes
     df["true_effect"] = dset.true_effects
 
-    # Change the enrolled column to be an integer to match the other boolean columns
+    # Change the enrolled column to be an integer to match the treatment column format
     df["enrolled"] = df["enrolled"].astype(int)
 
     # Save to csv
