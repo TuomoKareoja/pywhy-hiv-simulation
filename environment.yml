@@ -14,6 +14,6 @@ dependencies:
   - dowhy
   - econml
   - causal-learn
+  - statsmodels
   - jupyter
   - ipykernel
-  - pyarrow
