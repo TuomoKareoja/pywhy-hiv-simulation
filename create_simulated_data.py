@@ -133,60 +133,50 @@ def create_treatment_propensity(full_compliance, confounding):
 
 # Create four experiments with different settings
 
-experiment_full_compliance = wn.DynamicsExperiment(
+
+def define_experiment(name, description, full_compliance, confounding):
+    """Helper function to define an experiment."""
+    return wn.DynamicsExperiment(
+        name=name,
+        description=description,
+        simulator=wn.hiv,
+        simulator_config=wn.hiv.Config(epsilon_1=no_treatment_efficacy, end_time=observation_days),
+        intervention=wn.hiv.Intervention(time=treatment_assignment_day, epsilon_1=treatment_drug_efficacy),
+        state_sampler=initial_covariate_distribution,
+        propensity_scorer=create_treatment_propensity(full_compliance=full_compliance, confounding=confounding),
+        outcome_extractor=lambda run: run[observation_days - 1].infected_T2,
+        covariate_builder=lambda intervention, run: np.append(
+            run[treatment_assignment_day].values(), run.initial_state.enrolled
+        ),
+    )
+
+
+experiment_full_compliance = define_experiment(
     name="hiv_full_compliance",
     description="Full treatment compliance without confounding",
-    simulator=wn.hiv,
-    simulator_config=wn.hiv.Config(epsilon_1=no_treatment_efficacy, end_time=observation_days),
-    intervention=wn.hiv.Intervention(time=treatment_assignment_day, epsilon_1=treatment_drug_efficacy),
-    state_sampler=initial_covariate_distribution,
-    propensity_scorer=create_treatment_propensity(full_compliance=True, confounding=False),
-    outcome_extractor=lambda run: run[observation_days - 1].infected_T2,
-    covariate_builder=lambda intervention, run: np.append(
-        run[treatment_assignment_day].values(), run.initial_state.enrolled
-    ),
+    full_compliance=True,
+    confounding=False,
 )
 
-experiment_partial_compliance = wn.DynamicsExperiment(
+experiment_partial_compliance = define_experiment(
     name="hiv_partial_compliance",
     description="Partial treatment compliance without confounding",
-    simulator=wn.hiv,
-    simulator_config=wn.hiv.Config(epsilon_1=no_treatment_efficacy, end_time=observation_days),
-    intervention=wn.hiv.Intervention(time=treatment_assignment_day, epsilon_1=treatment_drug_efficacy),
-    state_sampler=initial_covariate_distribution,
-    propensity_scorer=create_treatment_propensity(full_compliance=False, confounding=False),
-    outcome_extractor=lambda run: run[observation_days - 1].infected_T2,
-    covariate_builder=lambda intervention, run: np.append(
-        run[treatment_assignment_day].values(), run.initial_state.enrolled
-    ),
+    full_compliance=False,
+    confounding=False,
 )
 
-experiment_full_compliance_confounding = wn.DynamicsExperiment(
+experiment_full_compliance_confounding = define_experiment(
     name="hiv_full_compliance_confounding",
     description="Full treatment compliance with confounding",
-    simulator=wn.hiv,
-    simulator_config=wn.hiv.Config(epsilon_1=no_treatment_efficacy, end_time=observation_days),
-    intervention=wn.hiv.Intervention(time=treatment_assignment_day, epsilon_1=treatment_drug_efficacy),
-    state_sampler=initial_covariate_distribution,
-    propensity_scorer=create_treatment_propensity(full_compliance=True, confounding=True),
-    outcome_extractor=lambda run: run[observation_days - 1].infected_T2,
-    covariate_builder=lambda intervention, run: np.append(
-        run[treatment_assignment_day].values(), run.initial_state.enrolled
-    ),
+    full_compliance=True,
+    confounding=True,
 )
 
-experiment_partial_compliance_confounding = wn.DynamicsExperiment(
+experiment_partial_compliance_confounding = define_experiment(
     name="hiv_partial_compliance_confounding",
     description="Partial treatment compliance with confounding",
-    simulator=wn.hiv,
-    simulator_config=wn.hiv.Config(epsilon_1=no_treatment_efficacy, end_time=observation_days),
-    intervention=wn.hiv.Intervention(time=treatment_assignment_day, epsilon_1=treatment_drug_efficacy),
-    state_sampler=initial_covariate_distribution,
-    propensity_scorer=create_treatment_propensity(full_compliance=False, confounding=True),
-    outcome_extractor=lambda run: run[observation_days - 1].infected_T2,
-    covariate_builder=lambda intervention, run: np.append(
-        run[treatment_assignment_day].values(), run.initial_state.enrolled
-    ),
+    full_compliance=False,
+    confounding=True,
 )
 
 # Run all experiments with the same seed
@@ -211,12 +201,15 @@ for dataset_name, dset in datasets.items():
             "infected_t2",
             "free_virus",
             "immune_response",
-            "instrument",
+            "enrolled",
         ],
     )
     df["treatment"] = dset.treatments
     df["outcome"] = dset.outcomes
     df["true_effect"] = dset.true_effects
+
+    # Change the enrolled column to be an integer to match the other boolean columns
+    df["enrolled"] = df["enrolled"].astype(int)
 
     # Save to csv
     df.to_csv(os.path.join("data", f"{dataset_name}.csv"), index=False)
