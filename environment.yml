@@ -1,0 +1,19 @@
+name: pywhy-hiv-simulation
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - tqdm
+  - scipy
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - networkx
+  - dowhy
+  - econml
+  - causal-learn
+  - jupyter
+  - ipykernel
+  - pyarrow
