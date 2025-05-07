@@ -1,5 +1,6 @@
-# Ignore CSV files in the data folder
+# Ignore CSV and pickle files in the data folder
 data/*.csv
+data/*.pkl
 
 # Typical ignores for configs, logs, and environments
 *.log

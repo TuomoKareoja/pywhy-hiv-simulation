@@ -4,14 +4,27 @@ import whynot as wn
 import pandas as pd
 import numpy as np
 import os
+import logging
+from tqdm import tqdm
+import time
 
 # %%
 
-seed = 123
+# Setup logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
+# %%
+
+number_of_experiments = 100
 
 # Experiment structure parameters
 
-patients = 500
+patients = 200
 observation_days = 150
 treatment_assignment_day = 100
 
@@ -151,6 +164,63 @@ def define_experiment(name, description, full_compliance, confounding):
     )
 
 
+# %%
+
+
+def simulate_experiments(num_experiments, experiment_definition):
+    """Simulate a number of experiments and return the datasets."""
+    datasets = []
+
+    logger.info(
+        f"Experiment: {experiment_definition.name} - {experiment_definition.description}, - {patients} patients"
+    )
+
+    start_time = time.time()
+
+    for i in tqdm(range(num_experiments), desc="Running experiments"):
+
+        dataset = experiment_definition.run(num_samples=patients, seed=i)
+
+        df = pd.DataFrame(
+            dataset.covariates,
+            columns=[
+                "uninfected_t1",
+                "infected_t1",
+                "uninfected_t2",
+                "infected_t2",
+                "free_virus",
+                "immune_response",
+                "enrolled",
+            ],
+        )
+        df["treatment"] = dataset.treatments
+        df["outcome"] = dataset.outcomes
+        df["true_effect"] = dataset.true_effects
+
+        # Change the enrolled column to be an integer to match the treatment column format
+        df["enrolled"] = df["enrolled"].astype(int)
+
+        df["experiment_number"] = i
+
+        datasets.append(df)
+
+    total_time = time.time() - start_time
+    logger.info(f"Completed all {num_experiments} experiments in {total_time:.2f}s")
+
+    df = pd.concat(datasets, ignore_index=True)
+    logger.info(f"Created dataset with {len(df)} rows")
+
+    return df
+
+
+# %%
+
+# Create data directory if it doesn't exist
+logger.info("Starting to generate HIV simulation datasets")
+
+# %%
+
+# Full compliance without confounding
 experiment_full_compliance = define_experiment(
     name="hiv_full_compliance",
     description="Full treatment compliance without confounding",
@@ -158,13 +228,40 @@ experiment_full_compliance = define_experiment(
     confounding=False,
 )
 
-experiment_partial_compliance = define_experiment(
+logger.info("Generating dataset with full compliance without confounding")
+df_full_compliance = simulate_experiments(
+    num_experiments=number_of_experiments,
+    experiment_definition=experiment_full_compliance,
+)
+
+# Save to pickle
+output_path = os.path.join("data", "hiv_full_compliance.pkl")
+df_full_compliance.to_pickle(output_path)
+logger.info(f"Saved dataset to {output_path}")
+
+# %%
+
+# Partial compliance without confounding
+experiments_partial_compliance = define_experiment(
     name="hiv_partial_compliance",
     description="Partial treatment compliance without confounding",
     full_compliance=False,
     confounding=False,
 )
 
+logger.info("Generating dataset with partial compliance without confounding")
+df_partial_compliance = simulate_experiments(
+    num_experiments=number_of_experiments,
+    experiment_definition=experiments_partial_compliance,
+)
+
+output_path = os.path.join("data", "hiv_partial_compliance.pkl")
+df_partial_compliance.to_pickle(output_path)
+logger.info(f"Saved dataset to {output_path}")
+
+# %%
+
+# Full compliance with confounding
 experiment_full_compliance_confounding = define_experiment(
     name="hiv_full_compliance_confounding",
     description="Full treatment compliance with confounding",
@@ -172,6 +269,19 @@ experiment_full_compliance_confounding = define_experiment(
     confounding=True,
 )
 
+logger.info("Generating dataset with full compliance with confounding")
+df_full_compliance_confounding = simulate_experiments(
+    num_experiments=number_of_experiments,
+    experiment_definition=experiment_full_compliance_confounding,
+)
+
+output_path = os.path.join("data", "hiv_full_compliance_confounding.pkl")
+df_full_compliance_confounding.to_pickle(output_path)
+logger.info(f"Saved dataset to {output_path}")
+
+# %%
+
+# Partial compliance with confounding
 experiment_partial_compliance_confounding = define_experiment(
     name="hiv_partial_compliance_confounding",
     description="Partial treatment compliance with confounding",
@@ -179,40 +289,18 @@ experiment_partial_compliance_confounding = define_experiment(
     confounding=True,
 )
 
-# Run all experiments with the same seed
-datasets = {
-    "hiv_full_compliance": experiment_full_compliance.run(num_samples=patients, seed=seed),
-    "hiv_partial_compliance": experiment_partial_compliance.run(num_samples=patients, seed=seed),
-    "hiv_full_compliance_confounding": experiment_full_compliance_confounding.run(num_samples=patients, seed=seed),
-    "hiv_partial_compliance_confounding": experiment_partial_compliance_confounding.run(
-        num_samples=patients, seed=seed
-    ),
-}
+logger.info("Generating dataset with partial compliance with confounding")
+df_partial_compliance_confounding = simulate_experiments(
+    num_experiments=number_of_experiments,
+    experiment_definition=experiment_partial_compliance_confounding,
+)
 
-# Process and save all datasets
-for dataset_name, dset in datasets.items():
-    # Turn into pandas dataframe
-    df = pd.DataFrame(
-        dset.covariates,
-        columns=[
-            "uninfected_t1",
-            "infected_t1",
-            "uninfected_t2",
-            "infected_t2",
-            "free_virus",
-            "immune_response",
-            "enrolled",
-        ],
-    )
-    df["treatment"] = dset.treatments
-    df["outcome"] = dset.outcomes
-    df["true_effect"] = dset.true_effects
+output_path = os.path.join("data", "hiv_partial_compliance_confounding.pkl")
+df_partial_compliance_confounding.to_pickle(output_path)
+logger.info(f"Saved dataset to {output_path}")
 
-    # Change the enrolled column to be an integer to match the treatment column format
-    df["enrolled"] = df["enrolled"].astype(int)
+# %%
 
-    # Save to csv
-    df.to_csv(os.path.join("data", f"{dataset_name}.csv"), index=False)
-    print(f"Created dataset: {dataset_name}.csv")
+logger.info("All datasets generated successfully!")
 
 # %%
