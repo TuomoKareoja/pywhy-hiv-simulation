@@ -23,7 +23,24 @@ Each dataset contains information about:
 - Patient covariates (immune response, virus levels, etc.)
 - Treatment assignment
 - Treatment outcome (infected macrophages at the end of observation)
-- True causal effect (known from the simulation)
+- True causal effect the patient would have received from taking the treatment
+
+# Dataset columns
+
+Covariates at the end of the experiment:
+- uninfected_t1 = Uninfected CD4+ T-lymphocytes (cells/ml)
+- infected_t1 = Infected CD4+ T-lymphocytes (cells/ml)
+- uninfected_t2 = Uninfected macrophages (cells/ml)
+- infected_t2 = Infected macrophages (cells/ml)
+- free_virus = Free virus (copies/ml)
+- immune_response = Immune response CTL E (cells/ml)
+
+Other:
+- enrolled = was the patient enrolled to the treatment group
+- treatment = did the patient take the treatment
+- outcome = The change in Infected macrophages (cells/ml) from the start to the end of experiment
+- true_effect = what would have been the real effect of the treatment for the patient if they would have taken it
+- experiment_number = identifier for the simulated experiment
 
 ## Setup
 
