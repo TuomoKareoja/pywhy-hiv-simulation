@@ -38,7 +38,7 @@ The simulation generates four different datasets, each representing a different 
 
 # Datasets
 
-Covariates at the end of the experiment:
+Covariates at the start of experiment:
 - uninfected_t1 = Uninfected T-cells (cells/ml)
 - infected_t1 = Infected T-cells (cells/ml)
 - uninfected_t2 = Uninfected macrophages (cells/ml)
@@ -52,7 +52,7 @@ entirely accurate. This means that there is noise in all these measurements
 Other:
 - enrolled = was the patient enrolled to the treatment group
 - treatment = did the patient take the treatment
-- outcome = The change in Infected macrophages (cells/ml) from the start to the end of experiment
+- outcome = The change in Infected macrophages (infected_t2) from the start to the end of experiment
 - true_effect = what would have been the real effect of the treatment for the patient if they would have taken it
 - experiment_number = identifier for the simulated experiment
 
