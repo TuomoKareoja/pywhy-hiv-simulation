@@ -12,6 +12,23 @@ The simulation creates datasets that model HIV treatment scenarios with the foll
 
 ## Datasets
 
+We are simulation HIV treatment experiments, where people with HIV infection randomized into treatment or control groups and then
+we follow them for X days. We care about the numbers at the end of treatment period.
+
+# How HIV infection and treatment works
+
+We can think of HIV infection as an interplay of five factions:
+
+- T1 – Helper T‑cells are the main target for the HIV virus wants to infect. Spawn at a steady rate, die naturally, or get turned into zombies if hit by virus.
+- T2 – Macrophages are additional targets for the HIV that are a bit harder to protect with treatment.
+- Infected T1 / T2 – HIV infected cells T-cells and macrophages. Once infected they start pumping out new virus particles, then eventually die on their own or when attacked by the immune killer T-cells
+- V – Free virus flowing around the body looking for cells to infect. Disappears when it finds and infects a healthy cell, but every infected cell creates more free virus
+- E – Killer T‑cells. Police force that multiplies when it sees infected cells and tries to kill them
+
+What treatment does is to gives targets cells better protection against the free virus. There is a twist though, that explains why HIV is so hard to treat: treatment works better on T1 than on T2 , which means macrophages can hide a low‑level infection even when most T1 are safe, making the virus almost impossible to eradicate.
+
+# The Experiments
+
 The simulation generates four different datasets, each representing a different experimental scenario:
 
 1. **Full Treatment Compliance**: All patients in the treatment group receive the treatment, and no patients in the control group receive it.
@@ -19,21 +36,15 @@ The simulation generates four different datasets, each representing a different 
 3. **Full Treatment Compliance with Confounding**: Treatment compliance is affected by confounding factors like immune response and virus levels.
 4. **Partial Treatment Compliance with Confounding**: Combines partial compliance with confounding effects.
 
-Each dataset contains information about:
-- Patient covariates (immune response, virus levels, etc.)
-- Treatment assignment
-- Treatment outcome (infected macrophages at the end of observation)
-- True causal effect the patient would have received from taking the treatment
-
-# Dataset columns
+# Datasets
 
 Covariates at the end of the experiment:
-- uninfected_t1 = Uninfected CD4+ T-lymphocytes (cells/ml)
-- infected_t1 = Infected CD4+ T-lymphocytes (cells/ml)
+- uninfected_t1 = Uninfected T-cells (cells/ml)
+- infected_t1 = Infected T-cells (cells/ml)
 - uninfected_t2 = Uninfected macrophages (cells/ml)
 - infected_t2 = Infected macrophages (cells/ml)
-- free_virus = Free virus (copies/ml)
-- immune_response = Immune response CTL E (cells/ml)
+- free_virus = Free virus in bloodstream (copies/ml)
+- immune_response = Killer T-cells (cells/ml)
 
 Other:
 - enrolled = was the patient enrolled to the treatment group
@@ -64,7 +75,6 @@ conda env create -f environment.yml
 
 # Activate the environment
 conda activate whynot
-
 ```
 
 ### Running the Simulation
