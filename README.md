@@ -23,7 +23,7 @@ We can think of HIV infection as an interplay of five factions:
 - T2 – Macrophages are additional targets for the HIV that are a bit harder to protect with treatment.
 - Infected T1 / T2 – HIV infected cells T-cells and macrophages. Once infected they start pumping out new virus particles, then eventually die on their own or when attacked by the immune killer T-cells
 - V – Free virus flowing around the body looking for cells to infect. Disappears when it finds and infects a healthy cell, but every infected cell creates more free virus
-- E – Killer T‑cells. Police force that multiplies when it sees infected cells and tries to kill them
+- E – Killer T‑cells. Police force that tries to kill infected cells and multiplies faster the more infected cells there are
 
 What treatment does is to gives targets cells better protection against the free virus. There is a twist though, that explains why HIV is so hard to treat: treatment works better on T1 than on T2 , which means macrophages can hide a low‑level infection even when most T1 are safe, making the virus almost impossible to eradicate.
 
@@ -46,6 +46,9 @@ Covariates at the end of the experiment:
 - free_virus = Free virus in bloodstream (copies/ml)
 - immune_response = Killer T-cells (cells/ml)
 
+The information about confounders comes from simulated lab-measurements which are not
+entirely accurate. This means that there is noise in all these measurements
+
 Other:
 - enrolled = was the patient enrolled to the treatment group
 - treatment = did the patient take the treatment
@@ -53,7 +56,11 @@ Other:
 - true_effect = what would have been the real effect of the treatment for the patient if they would have taken it
 - experiment_number = identifier for the simulated experiment
 
-## Setup
+Outcome is based on the same 'lab-measurements' as the covariates so it is not entirely accurate. True effect is not a measurement, but full actual ground truth.
+
+When analyzing the experiments we act as we would not know the treatment compliance and the true effect of the treatment as in a real setting we would not have this information
+
+## Project Setup
 
 ### Environment Setup
 
